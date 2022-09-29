@@ -24,10 +24,10 @@ socketIO.on("connection", (socket) => {
   });
 });
 
+import { tasks } from "./data";
+
 app.get("/api", (req, res) => {
-  res.json({
-    message: "Hello world!",
-  });
+  res.json(tasks);
 });
 
 app.listen(PORT, () => {

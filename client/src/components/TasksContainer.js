@@ -1,44 +1,45 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const TasksContainer = ({ socket }) => {
+  const [tasks, setTasks] = useState({});
+
+  useEffect(() => {
+    function fetchTasks() {
+      fetch("http://localhost:4000/api")
+        .then((res) => res.json())
+        .then((data) => {
+          console.log(data);
+          setTasks(data);
+        });
+    }
+    fetchTasks();
+  }, []);
   return (
     <div className="container">
-      <div className="pending__wrapper">
-        <h3>Pending Tasks</h3>
-        <div className="pending__container">
-          <div className="pending__items">
-            <p>Debug the Notification center</p>
-            <p className="comment">
-              <Link to="/comments">2 Comments</Link>
-            </p>
+      {Object.entries(tasks).map((task) => (
+        <div
+          className={`${task[1].title.toLowerCase()}__wrapper`}
+          key={task[1].title}
+        >
+          <h3>{task[1].title} Tasks</h3>
+          <div>
+            {task[1].items.map((item, index) => (
+              <div
+                className={`${task[1].title.toLowerCase()}__items`}
+                key={item.id}
+              >
+                <p>{item.title}</p>
+                <p className="comment">
+                  <Link to="/comments">
+                    {item.comments.length > 0 ? `View Comments` : `Add Comment`}
+                  </Link>
+                </p>
+              </div>
+            ))}
           </div>
         </div>
-      </div>
-
-      <div className="ongoing__wrapper">
-        <h3>Ongoing Tasks</h3>
-        <div className="ongoing__container">
-          <div className="ongoing__items">
-            <p>Create framework for new features</p>
-            <p className="comment">
-              <Link to="/comments">Add Comment</Link>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="completed__wrapper">
-        <h3>Completed Tasks</h3>
-        <div className="completed__container">
-          <div className="completed__items">
-            <p>Debug the Notification Center</p>
-            <p className="comment">
-              <Link to="/comments">2 Comments</Link>
-            </p>
-          </div>
-        </div>
-      </div>
+      ))}
     </div>
   );
 };
