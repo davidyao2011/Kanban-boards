@@ -1,16 +1,28 @@
-import React, { useState, useEffect } from "React";
+import React, { useState, useEffect } from "react";
 import socketIO from "socket.io-client";
 import { useParams } from "react-router-dom";
 
 const socket = socketIO.connect("http://localhost:4000");
 
 const Comments = () => {
+  const { category, id } = useParams();
   const [comment, setComment] = useState("");
+  const [commentList, setCommentList] = useState([]);
+
+  useEffect(() => {
+    socket.on("comments", (data) => setCommentList(data));
+  }, []);
+
+  useEffect(() => {
+    socket.emit("fetchComments", { category, id });
+  }, [category, id]);
 
   const addComment = (e) => {
     e.preventDefault();
-    console.log({
+    socket.emit("addComment", {
       comment,
+      category,
+      id,
       userId: localStorage.getItem("userId"),
     });
     setComment("");

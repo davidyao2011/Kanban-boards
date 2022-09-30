@@ -1,7 +1,7 @@
 const fetchID = () => Math.random().toString(36).substring(2, 10);
 
 //👇🏻 Nested object
-export let tasks = {
+let info = {
   pending: {
     title: "pending",
     items: [
@@ -45,3 +45,5 @@ export let tasks = {
     ],
   },
 };
+
+export { info };

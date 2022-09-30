@@ -1,15 +1,15 @@
 import React, { useState } from "react";
-import { useNagigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [username, setUsername] = useState("");
-  const navigate = useNagigate();
+  const navigate = useNavigate();
 
   const handleLogin = (e) => {
     e.preventDefault();
     localStorage.setItem("userId", username);
     setUsername("");
-    navigate("/tasks");
+    navigate("/task");
   };
 
   return (
