@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-function AddTask({ socket }) {
+const AddTask = ({ socket }) => {
   const [task, setTask] = useState("");
 
   const handleAddTodo = (e) => {
@@ -8,7 +8,6 @@ function AddTask({ socket }) {
     socket.emit("createTask", { task });
     setTask("");
   };
-
   return (
     <form className="form__input" onSubmit={handleAddTodo}>
       <label htmlFor="task">Add Todo</label>
@@ -21,9 +20,9 @@ function AddTask({ socket }) {
         required
         onChange={(e) => setTask(e.target.value)}
       />
-      <button className="addTodoBtn">Add Todo</button>
+      <button className="addTodoBtn">ADD TODO</button>
     </form>
   );
-}
+};
 
 export default AddTask;

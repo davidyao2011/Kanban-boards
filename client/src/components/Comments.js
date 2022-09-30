@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import socketIO from "socket.io-client";
 import { useParams } from "react-router-dom";
 
@@ -10,12 +10,12 @@ const Comments = () => {
   const [commentList, setCommentList] = useState([]);
 
   useEffect(() => {
-    socket.on("comments", (data) => setCommentList(data));
-  }, []);
-
-  useEffect(() => {
     socket.emit("fetchComments", { category, id });
   }, [category, id]);
+
+  useEffect(() => {
+    socket.on("comments", (data) => setCommentList(data));
+  }, []);
 
   const addComment = (e) => {
     e.preventDefault();
@@ -33,20 +33,26 @@ const Comments = () => {
       <form className="comment__form" onSubmit={addComment}>
         <label htmlFor="comment">Add a comment</label>
         <textarea
-          placeholder="Add your comment..."
+          placeholder="Type your comment..."
           value={comment}
-          id="comment"
           onChange={(e) => setComment(e.target.value)}
           rows={5}
+          id="comment"
           name="comment"
           required
         ></textarea>
-        <button className="commentBtn">Add Comment</button>
+        <button className="commentBtn">ADD COMMENT</button>
       </form>
-
-      <div className="comments_section">
+      <div className="comments__section">
         <h2>Existing Comments</h2>
-        <div></div>
+        {commentList.map((comment) => (
+          <div key={comment.id}>
+            <p>
+              <span style={{ fontWeight: "bold" }}>{comment.text} </span>by{" "}
+              {comment.name}
+            </p>
+          </div>
+        ))}
       </div>
     </div>
   );

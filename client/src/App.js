@@ -1,4 +1,3 @@
-import "./App.css";
 import { Route, Routes } from "react-router-dom";
 import Comments from "./components/Comments";
 import Task from "./components/Task";

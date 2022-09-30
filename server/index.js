@@ -1,18 +1,19 @@
 const express = require("express");
 const app = express();
-const PORT = 4000;
-const http = require("http").Server(app);
 const cors = require("cors");
-
+const http = require("http").Server(app);
+const PORT = 4000;
+// const { Novu } = require("@novu/node");
+// const novu = new Novu(<API_KEY>);
 const socketIO = require("socket.io")(http, {
   cors: {
     origin: "http://localhost:3000",
   },
 });
 
-app.use(express.urlencoded({ extened: true }));
-app.use(express.json());
 app.use(cors());
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 const fetchID = () => Math.random().toString(36).substring(2, 10);
 
@@ -61,59 +62,74 @@ let tasks = {
   },
 };
 
+// const sendNotification = async (user) => {
+// 	try {
+// 		const result = await novu.trigger("<TEMPLATE_ID>", {
+// 			to: {
+// 				subscriberId: "<SUBSCRIBER_ID>",
+// 			},
+// 			payload: {
+// 				userId: user,
+// 			},
+// 		});
+// 		console.log(result);
+// 	} catch (err) {
+// 		console.error("Error >>>>", { err });
+// 	}
+// };
 socketIO.on("connection", (socket) => {
-  console.log(`connected: ${socket.id} user just connected!`);
+  console.log(`⚡: ${socket.id} user just connected!`);
+
+  socket.on("createTask", (data) => {
+    const newTask = { id: fetchID(), title: data.task, comments: [] };
+    tasks["pending"].items.push(newTask);
+    socket.emit("tasks", tasks);
+
+    // 👇🏻 sends notification via Novu
+    // sendNotification(data.userId);
+  });
+
+  socket.on("taskDragged", (data) => {
+    const { source, destination } = data;
+    const itemMoved = {
+      ...tasks[source.droppableId].items[source.index],
+    };
+    console.log("ItemMoved>>> ", itemMoved);
+    tasks[source.droppableId].items.splice(source.index, 1);
+    tasks[destination.droppableId].items.splice(
+      destination.index,
+      0,
+      itemMoved
+    );
+    console.log("Source >>>", tasks[source.droppableId].items);
+    console.log("Destination >>>", tasks[destination.droppableId].items);
+    socket.emit("tasks", tasks);
+  });
 
   socket.on("fetchComments", (data) => {
-    const { category, id } = data;
-    const taskItems = tasks[category].items;
+    const taskItems = tasks[data.category].items;
     for (let i = 0; i < taskItems.length; i++) {
-      if (taskItems[i].id === id) {
+      if (taskItems[i].id === data.id) {
         socket.emit("comments", taskItems[i].comments);
       }
     }
   });
-
   socket.on("addComment", (data) => {
-    const { category, userId, comment, id } = data;
-    const taskItems = tasks[category].items;
+    const taskItems = tasks[data.category].items;
     for (let i = 0; i < taskItems.length; i++) {
-      if (taskItems[i].id === id) {
+      if (taskItems[i].id === data.id) {
         taskItems[i].comments.push({
-          name: userId,
-          text: comment,
+          name: data.userId,
+          text: data.comment,
           id: fetchID(),
         });
         socket.emit("comments", taskItems[i].comments);
       }
     }
   });
-
-  socket.on("createTask", (data) => {
-    const newTask = { id: fetchID(), title: data.title, comments: [] };
-    tasks["pending"].items.push(newTask);
-    socket.emit("task", tasks);
-  });
-
-  socket.on("taskDragged", (data) => {
-    console.log(data);
-    const { source, destination } = data;
-    const itemMoved = {
-      ...tasks[source.droppableId].items[source.index],
-    };
-    console.log("DraggedItem--->", itemMoved);
-
-    tasks[destination.droppableId].items.splice(
-      destination.index,
-      0,
-      itemMoved
-    );
-    socket.emit("tasks", tasks);
-  });
-
   socket.on("disconnect", () => {
     socket.disconnect();
-    console.log(`disconected: A user disconnected!`);
+    console.log("🔥: A user disconnected");
   });
 });
 
@@ -121,6 +137,6 @@ app.get("/api", (req, res) => {
   res.json(tasks);
 });
 
-app.listen(PORT, () => {
-  console.log(`Server is listening on ${PORT}`);
+http.listen(PORT, () => {
+  console.log(`Server listening on ${PORT}`);
 });
