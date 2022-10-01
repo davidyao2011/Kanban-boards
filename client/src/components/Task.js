@@ -9,7 +9,7 @@ const socket = socketIO.connect("http://localhost:4000");
 const Task = () => {
   return (
     <div>
-      <Nav />
+      <Nav name="Jacob" />
       <AddTask socket={socket} />
       <TasksContainer socket={socket} />
     </div>
