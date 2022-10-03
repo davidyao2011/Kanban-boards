@@ -165,3 +165,9 @@ body {
     outline: none;
     width: 200px;
 }
+
+.img-todo {
+    width: 30%;
+    height: 200px;
+    border-radius: 10px;
+}
